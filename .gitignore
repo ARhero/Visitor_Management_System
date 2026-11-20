@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+api/.pgdata/
+api/.pgdata*.log
+
+# Node
+node_modules/
+web/dist/
+
+# Env / secrets
+.env
+!.env.example
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+api/.media/
+api/.pass_signing_key.pem
+api/.vapid_key.pem
+api/.certs/
+web/test-results/
+web/playwright-report/
+api/.media-test/
+
+# Never commit settings backups, keys or logs (each server makes its own)
+.env.*
+!.env.example
+*.pem
+*.log
+.claude/settings.local.json

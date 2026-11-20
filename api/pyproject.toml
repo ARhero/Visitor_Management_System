@@ -1,0 +1,58 @@
+[project]
+name = "vms-api"
+version = "0.1.0"
+description = "Digital Visitor Management System - API"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "email-validator>=2.2",
+    "pyjwt[crypto]>=2.10",
+    "argon2-cffi>=23.1",
+    "redis>=5.2",
+    "arq>=0.26",
+    "python-multipart>=0.0.17",
+    "phonenumbers>=8.13",
+    "pillow>=13.0.0",
+    "boto3>=1.44.6",
+    "segno>=1.6.6",
+    "tzdata>=2026.6",
+    "fpdf2>=2.9.0",
+    "uharfbuzz>=0.57.0",
+    "openpyxl>=3.1.5",
+    "pywebpush>=2.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.28",
+    "fakeredis>=2.26",
+    "ruff>=0.8",
+    "pgserver>=0.1.4",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+ignore = ["B008", "UP046", "UP047"]
+
+[tool.ruff.lint.per-file-ignores]
+"alembic/versions/*" = ["E501"]
+"tests/*" = ["E501"]

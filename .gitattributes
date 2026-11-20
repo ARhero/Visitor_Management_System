@@ -1,0 +1,6 @@
+# Store text with LF; Windows batch files need CRLF to run correctly.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.ttf binary
+*.pdf binary

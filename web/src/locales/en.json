@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "VMS",
+    "tagline": "Visitor management without the register"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "identifier": "Email or mobile number",
+    "password": "Password",
+    "chooseOrg": "This login belongs to more than one organization. Choose one:",
+    "noAccount": "New to VMS?",
+    "createOrg": "Set up your organization",
+    "signOut": "Sign out",
+    "orPassword": "Sign in with a password",
+    "orWhatsApp": "No password? Get a sign-in link on WhatsApp",
+    "phone": "Mobile number",
+    "sendLink": "Send sign-in link",
+    "linkSent": "If this number belongs to someone at an organization on VMS, a sign-in link is on its way on WhatsApp. It works once, for 15 minutes.",
+    "askAdmin": "No password? Ask your admin for a sign-in link."
+  },
+  "nav": {
+    "menu": "Menu",
+    "overview": "Dashboard",
+    "sites": "Sites & gates",
+    "people": "People",
+    "form": "Check-in form",
+    "settings": "Settings",
+    "audit": "Audit log",
+    "invites": "Invites",
+    "blacklist": "Blacklist",
+    "guard": "Gate console",
+    "visits": "Visit log",
+    "reports": "Reports",
+    "evacuation": "Evacuation",
+    "privacy": "Privacy",
+    "setup": "Setup",
+    "host": "My visitors"
+  },
+  "common": {
+    "language": "Language",
+    "comingSoon": "Coming in the next phase"
+  }
+}

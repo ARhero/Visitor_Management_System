@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["--directory", "api", "run", "python", "scripts/dev_api.py"],
+      "port": 8000
+    },
+    {
+      "name": "api-no-whatsapp",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set WHATSAPP_PROVIDER=off&& uv --directory api run python scripts/dev_api.py"],
+      "port": 8000
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "web", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}

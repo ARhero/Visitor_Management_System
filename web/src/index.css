@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Design tokens. Calm, ink-on-paper admin surface; deep teal brand; saffron accent used sparingly. */
+@theme {
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-ink: #14201f;
+  --color-ink-2: #46524f;
+  --color-ink-3: #7a8582;
+  --color-paper: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-line: #e3e1da;
+  --color-line-strong: #cfccc2;
+
+  --color-brand: #0f4c5c;
+  --color-brand-600: #0c3f4c;
+  --color-brand-50: #e7f0f1;
+  --color-accent: #e36414;
+
+  --color-ok: #2f7d4f;
+  --color-ok-50: #e8f3ec;
+  --color-warn: #a86200;
+  --color-warn-50: #fbf1e1;
+  --color-bad: #b3261e;
+  --color-bad-50: #fbe9e7;
+
+  --radius-card: 10px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  font-feature-settings: "tnum" 1; /* tabular numbers: counts and times line up */
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
