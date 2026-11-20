@@ -33,7 +33,7 @@ Clone the repository, e.g. into `C:\VMS`:
 git clone https://github.com/<you>/<repo>.git C:\VMS
 ```
 
-The repository is private, so Git opens a browser window to sign in the first time. Use an account that has access to it. For a server nobody signs in to day to day, a read-only **deploy key** is better: GitHub → the repository → *Settings → Deploy keys*.
+If the repository is private, Git opens a browser window to sign in the first time; use an account that has access to it. (A public one needs no sign-in.) For a server nobody signs in to day to day, a read-only **deploy key** is better: GitHub → the repository → *Settings → Deploy keys*.
 
 The repository holds only the code. Settings, keys, the database, photos and certificates are never in it (`.gitignore` keeps them out), so each server makes its own in step 5. **Never copy `api\.env` or `.pem` files from another server.**
 
