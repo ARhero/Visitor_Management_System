@@ -30,7 +30,7 @@ Close and reopen PowerShell so all three are found.
 Clone the repository, e.g. into `C:\VMS`:
 
 ```powershell
-git clone https://github.com/<you>/<repo>.git C:\VMS
+git clone https://github.com/ARhero/Visitor_Management_System.git C:\VMS
 ```
 
 If the repository is private, Git opens a browser window to sign in the first time; use an account that has access to it. (A public one needs no sign-in.) For a server nobody signs in to day to day, a read-only **deploy key** is better: GitHub → the repository → *Settings → Deploy keys*.
