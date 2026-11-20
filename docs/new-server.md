@@ -12,29 +12,30 @@ If it must, here's the whole setup on a fresh Windows PC or server. Allow about 
 - It must stay **on** all the time (it is the gate system), and **not sleep** (*Settings → System → Power*).
 - Internet access during installation (to download packages).
 
-## 2. Install the two tools
+## 2. Install the three tools
 
-In PowerShell:
+1. **Git:** install from https://git-scm.com/download/win (default options). Its sign-in helper is included, which you need for a private repository.
+2. **uv,** which runs the Python side and fetches the right Python version itself. In PowerShell:
+
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+3. **Node.js LTS:** from https://nodejs.org (the Windows installer, default options).
+
+Close and reopen PowerShell so all three are found.
+
+## 3. Get the code
+
+Clone the repository, e.g. into `C:\VMS`:
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+git clone https://github.com/<you>/<repo>.git C:\VMS
 ```
 
-That installs **uv**, which runs the Python side and fetches the right Python version itself. Then install **Node.js LTS** from https://nodejs.org (the Windows installer, default options).
+The repository is private, so Git opens a browser window to sign in the first time. Use an account that has access to it. For a server nobody signs in to day to day, a read-only **deploy key** is better: GitHub → the repository → *Settings → Deploy keys*.
 
-Close and reopen PowerShell so both are found.
-
-## 3. Copy the code
-
-On **this** PC, copy the project without its data, keys, settings or downloaded packages. For example, to a USB drive `E:`:
-
-```powershell
-robocopy C:\Users\ARhero\Projects\VMS E:\VMS /E /XD .venv node_modules .pgdata .media .media-test .certs dist test-results __pycache__ .git /XF .env .env.dev.bak .pass_signing_key.pem .vapid_key.pem *.log
-```
-
-On the new server, copy `E:\VMS` to e.g. `C:\VMS`. (Once the code is in a git repository, you can `git clone` it there instead.)
-
-**Never copy `api\.env` or the `.pem` files between servers.** Each server gets its own keys in step 5.
+The repository holds only the code. Settings, keys, the database, photos and certificates are never in it (`.gitignore` keeps them out), so each server makes its own in step 5. **Never copy `api\.env` or `.pem` files from another server.**
 
 ## 4. Network
 
@@ -104,13 +105,13 @@ Then:
 
 - **Start automatically:** in Task Scheduler, create a task *At log on* that runs `C:\VMS\serve-public.bat`. Make the PC sign in automatically after power cuts, or put it on a UPS.
 - **Backups:** regularly close the window and copy `api\.pgdata` (the database) and `api\.media` (photos) somewhere safe. There is no automatic backup yet.
-- **Updates:** copy the new code over with the same `robocopy` command (it skips data and settings), then run `serve-public.bat` again. It rebuilds and applies database updates.
+- **Updates:** close the window, run `git pull` in `C:\VMS`, then run `serve-public.bat` again. It rebuilds and applies database updates. Your settings and data are untouched, since they are not in git.
 
 ## If something goes wrong
 
 | Problem | What to check |
 |---|---|
-| `uv` or `npm` "not recognized" | Reopen PowerShell after installing; reinstall if needed |
+| `git`, `uv` or `npm` "not recognized" | Reopen PowerShell after installing; reinstall if needed |
 | The browser can't reach the address | Test from a phone on mobile data (routers often can't reach their own public IP from inside), then check the port forward and firewall rule |
 | "Address already in use" | Something else uses 8443: run step 5 again with another port, change the forward and firewall rule to match |
 | Forgot a password | `uv run python -m scripts.set_password <email>` in `C:\VMS\api` |
