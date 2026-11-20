@@ -1,15 +1,17 @@
 # VMS: Digital Visitor Management
 
-Replaces the paper visitor register. Visitors check in on their own phone by scanning a QR poster, hosts approve on WhatsApp, and guards verify passes in a phone browser. No hardware, no app installs.
+Replaces the paper visitor register. Visitors check in on their own phone by scanning a QR poster, hosts approve from a phone alert or WhatsApp, and guards verify passes in a phone browser. No hardware, no app installs.
 
 This guide covers installing, starting and using the system. The design (data model, API routes, decisions) is in [docs/PROPOSAL.md](docs/PROPOSAL.md).
+
+> **About the addresses in this guide.** `localhost` means "this computer": an address like `http://localhost:5173` only opens in a browser **on the computer running VMS**, after you start it (section 1). Other devices, such as phones and other PCs, use that computer's own address instead: on your Wi-Fi its local address (find it with `ipconfig`; `192.168.1.12` below is only an example), or on a server the public address you set up (e.g. `https://203.0.113.10:8443`, see [docs/public-setup.md](docs/public-setup.md)). None of these addresses open from GitHub.
 
 - [1. Install and start (Windows)](#1-install-and-start-windows)
 - [2. Other ways to run it](#2-other-ways-to-run-it)
 - [3. Logging in](#3-logging-in)
 - [4. Setting up a new organization](#4-setting-up-a-new-organization)
 - [5. Day-to-day use](#5-day-to-day-use)
-- [6. WhatsApp](#6-whatsapp)
+- [6. WhatsApp, or running without it](#6-whatsapp-or-running-without-it)
 - [7. Going to production](#7-going-to-production)
 - [8. Maintenance](#8-maintenance)
 - [9. Tests](#9-tests)
@@ -32,15 +34,15 @@ No database, Redis, Docker or MinIO is needed for local use: the API runs its ow
 2. starts PostgreSQL and applies any new database changes;
 3. loads demo data, on the first run only;
 4. starts the API and the web app, each in its own window;
-5. waits until both answer, then opens http://localhost:5173.
+5. waits until both answer, then opens `http://localhost:5173`.
 
 It is safe to run again at any time: whatever is already running is left alone. The first run downloads packages and takes a few minutes; later starts take seconds.
 
 | What | Where |
 |---|---|
-| The app | http://localhost:5173 |
-| Mock WhatsApp inbox (local only) | http://localhost:5173/dev/whatsapp |
-| API documentation | http://localhost:8000/api/docs |
+| The app | `http://localhost:5173` |
+| Mock WhatsApp inbox (local only) | `http://localhost:5173/dev/whatsapp` |
+| API documentation | `http://localhost:8000/api/docs` |
 
 **Stop:** close the **VMS API** and **VMS web** windows. PostgreSQL keeps running in the background (it uses little); to stop it too:
 
@@ -88,7 +90,7 @@ docker compose up --build
 docker compose exec api python -m scripts.seed
 ```
 
-This runs PostgreSQL, Redis, MinIO (photo storage, console on http://localhost:9001), the API, the background worker and the web app, with the same addresses as above. The Docker setup has not been tested on this machine.
+This runs PostgreSQL, Redis, MinIO (photo storage, console on `http://localhost:9001`), the API, the background worker and the web app, with the same addresses as above. The Docker setup has not been tested on this machine.
 
 ## 3. Logging in
 
@@ -99,7 +101,7 @@ The demo data creates *Kalinga Infotech*, with two sites, ten hosts and a few we
 | Org admin | `admin@kalinga.demo` | `/admin` |
 | Guard | `9861000002` | `/guard` (gate console) |
 | Host | no password: choose *Get a sign-in link on WhatsApp*, enter e.g. `9861000018` (Meera Iyer), open the link from the mock inbox. Without WhatsApp: the admin opens the person under **People** and uses *Create link* | `/host` |
-| Super admin | `root@vms.local`, at http://localhost:5173/platform | `/platform` |
+| Super admin | `root@vms.local`, at `http://localhost:5173/platform` | `/platform` |
 
 Everything sent "on WhatsApp" locally (codes, sign-in links, approval requests) appears in the mock inbox at `/dev/whatsapp`, where you can tap the buttons. To try the system the way it runs **without WhatsApp**, see [section 6](#6-whatsapp-or-running-without-it).
 
@@ -120,11 +122,11 @@ QR codes and links use `PUBLIC_WEB_URL`, which is `localhost` by default, and a 
 4. Re-download QR posters (old ones still point to the old address).
 5. On each phone (same Wi-Fi), the first visit shows a certificate warning: tap *Advanced → Proceed* (Chrome) or *Show details → visit this website* (Safari). If the page doesn't load at all, allow Node.js through Windows Firewall on private networks.
 
-Phone alerts for hosts don't work with a self-signed certificate; they need a real one (a public HTTPS address). The address can change when the computer reconnects to Wi-Fi; check `ipconfig` if phones stop connecting. The browser tests (`npm run e2e`) expect the mock WhatsApp and run with `E2E_BASE_URL=https://localhost:5173` when https is on.
+Phone alerts for hosts don't work with a self-signed certificate; they need a real one (a public HTTPS address). The address can change when the computer reconnects to Wi-Fi; check `ipconfig` if phones stop connecting. The browser tests (`npm run e2e`) expect the mock WhatsApp and run with `E2E_BASE_URL=`https://localhost:5173`` when https is on.
 
 ## 4. Setting up a new organization
 
-1. Open http://localhost:5173/signup and create the organization and its first admin.
+1. Open `http://localhost:5173/signup` and create the organization and its first admin.
 2. The **setup wizard** opens and walks through six steps:
    1. **Organization**: logo, colours, the language visitors see first, and a privacy contact.
    2. **First site and gate**, e.g. "Head office", "Main gate".
@@ -314,7 +316,7 @@ The API tests start their own embedded database. `npm run e2e` uses your install
 | A window closes or shows an error | Read the **VMS API** / **VMS web** window. The database log is `api/.pgdata.log`. |
 | "Port already in use" | Something else uses port 8000, 5173 or 54329. Close it, or stop VMS windows left over from an earlier run. |
 | Signed out unexpectedly | Sessions last 14 days of inactivity; sign in again |
-| No WhatsApp message arrives locally | Look in http://localhost:5173/dev/whatsapp, not on a phone |
+| No WhatsApp message arrives locally | Look in `http://localhost:5173/dev/whatsapp`, not on a phone |
 | A pass shows "not valid" after setting a new `PASS_SIGNING_KEY` | Expected: passes signed with the old key no longer verify |
 | The gate console shows "No connection" | Passes are still checked against today's list; check-ins sync when the connection is back (section 5) |
 
