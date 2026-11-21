@@ -4,7 +4,7 @@ Replaces the paper visitor register. Visitors check in on their own phone by sca
 
 This guide covers installing, starting and using the system. The design (data model, API routes, decisions) is in [docs/PROPOSAL.md](docs/PROPOSAL.md).
 
-> **About the addresses in this guide.** `localhost` means "this computer": an address like `http://localhost:5173` only opens in a browser **on the computer running VMS**, after you start it (section 1). Other devices, such as phones and other PCs, use that computer's own address instead: on your Wi-Fi its local address (find it with `ipconfig`; `192.168.1.12` below is only an example), or on a server the public address you set up (e.g. `https://203.0.113.10:8443`, see [docs/public-setup.md](docs/public-setup.md)). None of these addresses open from GitHub.
+> **About the addresses in this guide.** `localhost` means "this computer": an address like `https://localhost:5173` only opens in a browser **on the computer running VMS**, after you start it (section 1). Other devices, such as phones and other PCs, use that computer's own address instead: on your Wi-Fi its local address (find it with `ipconfig`; `192.168.1.12` below is only an example), or on a server the public address you set up (e.g. `https://203.0.113.10:8443`, see [docs/public-setup.md](docs/public-setup.md)). None of these addresses open from GitHub.
 
 - [1. Install and start (Windows)](#1-install-and-start-windows)
 - [2. Other ways to run it](#2-other-ways-to-run-it)
@@ -30,18 +30,18 @@ No database, Redis, Docker or MinIO is needed for local use: the API runs its ow
 
 **Start everything:** double-click **`start.bat`** in the project folder (or run it from a terminal). It:
 
-1. creates `api\.env` with local settings, on the first run only;
+1. creates `api\.env` with local settings, on the first run only, and points QR codes at this computer's Wi-Fi address so phones can use them;
 2. starts PostgreSQL and applies any new database changes;
 3. loads demo data, on the first run only;
 4. starts the API and the web app, each in its own window;
-5. waits until both answer, then opens `http://localhost:5173`.
+5. waits until both answer, then opens the app in your browser at this computer's Wi-Fi address (e.g. `https://192.168.1.12:5173`). Accept the certificate warning once (see [Using phones on your Wi-Fi](#using-phones-on-your-wi-fi)).
 
 It is safe to run again at any time: whatever is already running is left alone. The first run downloads packages and takes a few minutes; later starts take seconds.
 
 | What | Where |
 |---|---|
-| The app | `http://localhost:5173` |
-| Mock WhatsApp inbox (local only) | `http://localhost:5173/dev/whatsapp` |
+| The app | `https://localhost:5173` |
+| Mock WhatsApp inbox (local only) | `https://localhost:5173/dev/whatsapp` |
 | API documentation | `http://localhost:8000/api/docs` |
 
 **Stop:** close the **VMS API** and **VMS web** windows. PostgreSQL keeps running in the background (it uses little); to stop it too:
@@ -101,32 +101,29 @@ The demo data creates *Kalinga Infotech*, with two sites, ten hosts and a few we
 | Org admin | `admin@kalinga.demo` | `/admin` |
 | Guard | `9861000002` | `/guard` (gate console) |
 | Host | no password: choose *Get a sign-in link on WhatsApp*, enter e.g. `9861000018` (Meera Iyer), open the link from the mock inbox. Without WhatsApp: the admin opens the person under **People** and uses *Create link* | `/host` |
-| Super admin | `root@vms.local`, at `http://localhost:5173/platform` | `/platform` |
+| Super admin | `root@vms.local`, at `https://localhost:5173/platform` | `/platform` |
 
 Everything sent "on WhatsApp" locally (codes, sign-in links, approval requests) appears in the mock inbox at `/dev/whatsapp`, where you can tap the buttons. To try the system the way it runs **without WhatsApp**, see [section 6](#6-whatsapp-or-running-without-it).
 
-### Trying it with phones on your Wi-Fi
+### Using phones on your Wi-Fi
 
-QR codes and links use `PUBLIC_WEB_URL`, which is `localhost` by default, and a phone can't open that. To use real phones:
+`start.bat` points QR codes and links at this computer's **Wi-Fi address**, e.g. `https://192.168.1.12:5173`, so phones on the same Wi-Fi can scan them. It checks the address on every start, so it follows along if the router hands out a new one.
 
-1. Find this computer's Wi-Fi address with `ipconfig` (e.g. `192.168.1.12`).
-2. In `api\.env` set:
+1. Connect the phone to the **same Wi-Fi** as this computer.
+2. Download the QR posters again after the address changes (*Sites & gates*); old posters keep the old address.
+3. The first time each phone opens the app, it warns that the connection isn't private, because the certificate is made by this computer. Tap *Advanced → Proceed* (Chrome) or *Show details → visit this website* (Safari). The https address is what lets the guard's camera scanner work: browsers only allow the camera on https.
+4. If a phone can't load the page at all, Windows Firewall is blocking it. When Windows asks, allow **Node.js**. Otherwise allow it under *Windows Security → Firewall → Allow an app through firewall*.
 
-   ```
-   PUBLIC_WEB_URL=https://192.168.1.12:5173
-   CORS_ORIGINS=["http://localhost:5173","https://localhost:5173","https://192.168.1.12:5173"]
-   ```
-
-   WhatsApp does not make bare addresses like this tappable: copy links into Chrome. (A name such as `192.168.1.12.sslip.io` would be tappable, but many home routers block names that point inside the network.)
-3. Close the "VMS API" and "VMS web" windows and run `start.bat` again. With an `https://` address the web server uses a self-signed certificate, which the guard's camera scanner needs: browsers only allow the camera on https.
-4. Re-download QR posters (old ones still point to the old address).
-5. On each phone (same Wi-Fi), the first visit shows a certificate warning: tap *Advanced → Proceed* (Chrome) or *Show details → visit this website* (Safari). If the page doesn't load at all, allow Node.js through Windows Firewall on private networks.
-
-Phone alerts for hosts don't work with a self-signed certificate; they need a real one (a public HTTPS address). The address can change when the computer reconnects to Wi-Fi; check `ipconfig` if phones stop connecting. The browser tests (`npm run e2e`) expect the mock WhatsApp and run with `E2E_BASE_URL=`https://localhost:5173`` when https is on.
+Good to know:
+- **WhatsApp links:** WhatsApp doesn't make bare addresses like these tappable, so people copy links into the browser.
+- **Phone alerts:** alerts for hosts need a real certificate, so they don't work here (see section 7).
+- **This computer only:** to keep everything on `localhost` with no phones, put `LAN_ADDRESS=off` in `api\.env`.
+- **Reaching it from outside your Wi-Fi:** see [docs/public-setup.md](docs/public-setup.md).
+- **Browser tests:** `npm run e2e` expects the mock WhatsApp, and follows the https setting by itself.
 
 ## 4. Setting up a new organization
 
-1. Open `http://localhost:5173/signup` and create the organization and its first admin.
+1. Open `https://localhost:5173/signup` and create the organization and its first admin.
 2. The **setup wizard** opens and walks through six steps:
    1. **Organization**: logo, colours, the language visitors see first, and a privacy contact.
    2. **First site and gate**, e.g. "Head office", "Main gate".
@@ -316,7 +313,7 @@ The API tests start their own embedded database. `npm run e2e` uses your install
 | A window closes or shows an error | Read the **VMS API** / **VMS web** window. The database log is `api/.pgdata.log`. |
 | "Port already in use" | Something else uses port 8000, 5173 or 54329. Close it, or stop VMS windows left over from an earlier run. |
 | Signed out unexpectedly | Sessions last 14 days of inactivity; sign in again |
-| No WhatsApp message arrives locally | Look in `http://localhost:5173/dev/whatsapp`, not on a phone |
+| No WhatsApp message arrives locally | Look in `https://localhost:5173/dev/whatsapp`, not on a phone |
 | A pass shows "not valid" after setting a new `PASS_SIGNING_KEY` | Expected: passes signed with the old key no longer verify |
 | The gate console shows "No connection" | Passes are still checked against today's list; check-ins sync when the connection is back (section 5) |
 

@@ -24,6 +24,12 @@ if not exist "api\.env" (
   set "SEED=&& uv run python -m scripts.seed"
 )
 
+rem ---------- Phones: QR codes and links use this PC's Wi-Fi address ----------
+rem (follows the address if the router changes it; LAN_ADDRESS=off in api\.env turns this off)
+pushd api
+uv run python -m scripts.lan_address
+popd
+
 rem Where the app is opened: PUBLIC_WEB_URL in api\.env (an https:// address there also
 rem makes the web server use https, e.g. for the camera on phones), else localhost.
 set "WEB=http://localhost:5173"
