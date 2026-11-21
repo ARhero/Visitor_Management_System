@@ -20,6 +20,7 @@ if not exist "api\.env" (
     echo DATABASE_ADMIN_URL=postgresql+asyncpg://vms:vms@127.0.0.1:54329/vms
     echo REDIS_URL=memory://
     echo STORAGE_BACKEND=local
+    echo WHATSAPP_PROVIDER=off
   ) > "api\.env"
   set "SEED=&& uv run python -m scripts.seed"
 )
@@ -76,7 +77,7 @@ curl -s -o nul -k https://127.0.0.1:5173/ || curl -s -o nul http://127.0.0.1:517
 echo.
 echo VMS is running:
 echo   App            %WEB%
-echo   Mock WhatsApp  %WEB%/dev/whatsapp
+findstr /r /c:"^WHATSAPP_PROVIDER=mock" "api\.env" >nul && echo   Mock WhatsApp  %WEB%/dev/whatsapp
 echo   API docs       http://localhost:8000/api/docs
 if not defined VMS_NO_BROWSER start "" %WEB%
 exit /b 0

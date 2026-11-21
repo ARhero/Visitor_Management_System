@@ -57,11 +57,12 @@ class Settings(BaseSettings):
     pass_signing_key: str = ""
     pass_key_file: str = ".pass_signing_key.pem"
 
-    # WhatsApp. "mock" logs every message to the DB; /dev/whatsapp shows them.
-    # "off" runs without WhatsApp: no visitor codes, hosts are alerted by web push, the
-    # visitor keeps their screen open for the answer and the pass, and links are shared
-    # by people from their own WhatsApp.
-    whatsapp_provider: Literal["mock", "meta", "off"] = "mock"
+    # WhatsApp. "off" (default): no WhatsApp. No visitor codes, hosts are alerted by web
+    # push, the visitor keeps their screen open for the answer and the pass, and links are
+    # shared by people from their own WhatsApp. "mock" logs every message to the DB and
+    # /dev/whatsapp shows them (trying the WhatsApp flows locally; the tests use it).
+    # "meta" sends for real through the WhatsApp Business Cloud API.
+    whatsapp_provider: Literal["mock", "meta", "off"] = "off"
     whatsapp_app_secret: str = ""  # verifies X-Hub-Signature-256 on webhooks
     whatsapp_verify_token: str = "dev-verify-token"
     # Meta Cloud API (WHATSAPP_PROVIDER=meta): the platform's shared business number.

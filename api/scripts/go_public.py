@@ -3,7 +3,8 @@
     uv run python -m scripts.go_public https://203.0.113.10:8443
 
 - Copies the current api/.env to api/.env.dev.bak (once), so you can go back.
-- Sets ENV=prod, the public address, secure cookies, WhatsApp off, no public sign-up,
+- Sets ENV=prod, the public address, secure cookies, WhatsApp off (kept on only if it
+  was real WhatsApp, "meta"), no public sign-up,
   and serving the built web app from the API (WEB_DIST_DIR). On a fresh server it also
   sets the built-in database, like start.bat's first run.
 - Generates the secrets production needs, unless already set: JWT_SECRET,
@@ -65,7 +66,8 @@ def main(url: str) -> None:
         "PUBLIC_WEB_URL": f"{u.scheme}://{u.netloc}",
         "CORS_ORIGINS": f'["{u.scheme}://{u.netloc}"]',
         "COOKIE_SECURE": "true",
-        "WHATSAPP_PROVIDER": current.get("WHATSAPP_PROVIDER", "off"),
+        # No WhatsApp unless real WhatsApp (meta) is already set up; never the mock inbox.
+        "WHATSAPP_PROVIDER": "meta" if current.get("WHATSAPP_PROVIDER") == "meta" else "off",
         "WEB_DIST_DIR": "../web/dist",
         "VMS_PORT": str(u.port),
         # Only the super admin creates organizations (in /platform).

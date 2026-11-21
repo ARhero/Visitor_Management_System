@@ -100,10 +100,10 @@ The demo data creates *Kalinga Infotech*, with two sites, ten hosts and a few we
 |---|---|---|
 | Org admin | `admin@kalinga.demo` | `/admin` |
 | Guard | `9861000002` | `/guard` (gate console) |
-| Host | no password: choose *Get a sign-in link on WhatsApp*, enter e.g. `9861000018` (Meera Iyer), open the link from the mock inbox. Without WhatsApp: the admin opens the person under **People** and uses *Create link* | `/host` |
+| Host | no password: as admin, open the host under **People** (e.g. Meera Iyer) and use *Create link*; open that link (in another browser, or on a phone) | `/host` |
 | Super admin | `root@vms.local`, at `https://localhost:5173/platform` | `/platform` |
 
-Everything sent "on WhatsApp" locally (codes, sign-in links, approval requests) appears in the mock inbox at `/dev/whatsapp`, where you can tap the buttons. To try the system the way it runs **without WhatsApp**, see [section 6](#6-whatsapp-or-running-without-it).
+VMS runs **without WhatsApp** by default: there are no visitor codes, hosts approve in the host app (with phone alerts), and links are shared from people's own WhatsApp. [Section 6](#6-whatsapp-or-running-without-it) explains this, and how to try the WhatsApp flows with the mock inbox.
 
 ### Using phones on your Wi-Fi
 
@@ -201,7 +201,7 @@ Visitor, guard, host, pass and privacy screens are in English and Hindi; the adm
 
 ### Without WhatsApp (no business account needed)
 
-Set `WHATSAPP_PROVIDER=off` in `api/.env` and restart the API. Then:
+This is the default (`WHATSAPP_PROVIDER=off` in `api/.env`; installs from before this default may still say `mock`, so change it and restart). Then:
 
 | Normally on WhatsApp | Without WhatsApp |
 |---|---|
@@ -209,17 +209,17 @@ Set `WHATSAPP_PROVIDER=off` in `api/.env` and restart the API. Then:
 | Host's approval request, reminders, arrivals | Phone alerts (web push) from the host app, with Approve / Decline. Each host turns on alerts once on their phone; until then they only see visitors while the host app is open |
 | Visitor's answer and pass | On the visitor's own screen, which updates live; they keep it open or take a screenshot |
 | Invite passes to guests | The host taps *Share on WhatsApp* next to each guest: their own WhatsApp opens with the invitation typed in |
-| Sign-in links for hosts | The admin opens the person under **People → Create link** and shares it the same way (works once, within 3 days). Or give hosts a password |
+| Sign-in links for hosts | The admin opens the person under **People → Create link** and shares it the same way (works once, within 3 days) |
 | Evacuation message to safety contacts | *Share list on WhatsApp* opens the guard's own WhatsApp with the message, e.g. for a safety group |
 | Visitor's own privacy page | Shows the privacy contact; an admin handles requests under **Privacy** |
 
 For phone alerts in production, set `VAPID_PRIVATE_KEY` (the command is in [.env.example](.env.example)) and `VAPID_SUBJECT`, and serve the site over HTTPS (browsers only allow alerts on HTTPS or localhost). Changing the key means everyone has to turn alerts on again.
 
-To try it locally, start the API with `WHATSAPP_PROVIDER=off`. The in-app browser used for development blocks notifications, so test alerts in Chrome on a phone or computer.
+Phone alerts need a real certificate, so test them on a server with a domain, not on the local Wi-Fi setup.
 
 ### With WhatsApp
 
-**Locally** nothing is sent (`WHATSAPP_PROVIDER=mock`, the default). Messages appear in the mock inbox at `/dev/whatsapp`, where tapping a button behaves exactly like a real reply. Type `STOP` or `START` there to try opting out.
+**To try it locally,** set `WHATSAPP_PROVIDER=mock` in `api/.env` and restart. Nothing is sent: messages appear in the mock inbox at `/dev/whatsapp`, where tapping a button behaves exactly like a real reply. Type `STOP` or `START` there to try opting out. The browser tests (`npm run e2e`) need this mode.
 
 **To send real messages** through the Meta WhatsApp Business Cloud API (one shared number for all organizations):
 
@@ -313,7 +313,7 @@ The API tests start their own embedded database. `npm run e2e` uses your install
 | A window closes or shows an error | Read the **VMS API** / **VMS web** window. The database log is `api/.pgdata.log`. |
 | "Port already in use" | Something else uses port 8000, 5173 or 54329. Close it, or stop VMS windows left over from an earlier run. |
 | Signed out unexpectedly | Sessions last 14 days of inactivity; sign in again |
-| No WhatsApp message arrives locally | Look in `https://localhost:5173/dev/whatsapp`, not on a phone |
+| No WhatsApp message arrives locally | WhatsApp is off by default. With `WHATSAPP_PROVIDER=mock`, look in `https://localhost:5173/dev/whatsapp`, not on a phone |
 | A pass shows "not valid" after setting a new `PASS_SIGNING_KEY` | Expected: passes signed with the old key no longer verify |
 | The gate console shows "No connection" | Passes are still checked against today's list; check-ins sync when the connection is back (section 5) |
 
