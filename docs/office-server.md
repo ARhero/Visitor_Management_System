@@ -7,6 +7,8 @@ This sets up VMS on **a computer in your office**, reachable from anywhere at **
 
 It runs without WhatsApp, and your existing website is not touched.
 
+> **Is port 443 on your office static IP already used by a Microsoft (IIS) web server?** Then follow [office-server-iis.md](office-server-iis.md) instead: IIS forwards the subdomain to VMS, and Caddy and router changes aren't needed.
+
 Replace these examples everywhere with your own:
 
 | Example | Meaning |

@@ -86,43 +86,12 @@ Then double-click **`serve-public.bat`**. It should say *"VMS is starting on por
 
 ## 3B. IIS in front (existing IIS server)
 
-Done on the IIS server by whoever manages it:
-
-1. **Install the two IIS add-ons** from Microsoft, if not already there: **URL Rewrite** and **Application Request Routing (ARR)**.
-2. **Turn on forwarding:** in IIS Manager → the server → *Application Request Routing Cache* → *Server Proxy Settings*:
-   - tick **Enable proxy**;
-   - check that *Preserve client IP in the following header* says `X-Forwarded-For`;
-   - set **Response buffer threshold** to `0`, so live updates (the visitor's waiting screen) aren't held back;
-   - Apply.
-3. **Create a site** for the subdomain, e.g. *Sites → Add Website*:
-   - name `vms`;
-   - an empty folder such as `C:\inetpub\vms`;
-   - binding https, host name `vms.yourcompany.com`, with *Require Server Name Indication* ticked.
-4. **Get its certificate** with **win-acme** (free, https://www.win-acme.com). Run `wacs.exe` and choose *Create certificate* for the `vms` site; it installs the certificate and renews it automatically.
-5. **Put this `web.config`** in the site's folder (`C:\inetpub\vms\web.config`). Change `192.168.1.12` to the VMS computer's local address, or `127.0.0.1` if VMS runs on the IIS server itself:
-
-   ```xml
-   <?xml version="1.0" encoding="UTF-8"?>
-   <configuration>
-     <system.webServer>
-       <rewrite>
-         <rules>
-           <rule name="VMS" stopProcessing="true">
-             <match url="(.*)" />
-             <action type="Rewrite" url="http://192.168.1.12:8080/{R:1}" />
-           </rule>
-         </rules>
-       </rewrite>
-     </system.webServer>
-   </configuration>
-   ```
-6. **On the VMS computer:** allow port 8080 from the IIS server only (PowerShell as Administrator):
-
-   ```powershell
-   New-NetFirewallRule -DisplayName "VMS from IIS" -Direction Inbound -Protocol TCP -LocalPort 8080 -RemoteAddress 192.168.1.5 -Action Allow -Profile Any
-   ```
-
-   No router change is needed for VMS: the visitors' requests reach IIS, which already has 443.
+The complete steps for the IIS administrator are in [office-server-iis.md](office-server-iis.md), Part 4. In short:
+- install URL Rewrite and ARR;
+- enable the proxy, with no response buffering and the client IP without its port;
+- add a `vms` site bound to `vms.yourcompany.com`;
+- get its certificate with win-acme;
+- add a `web.config` that lets certificate checks through and forwards everything else to `http://<VMS computer>:8080`.
 
 ---
 
