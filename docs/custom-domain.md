@@ -1,7 +1,5 @@
 # Running VMS on a subdomain of your domain
 
-> Setting up an office computer from scratch with Caddy? [office-server.md](office-server.md) has every step in order, including this one.
-
 This gives VMS an address like `https://vms.yourcompany.com`, with a real certificate:
 - no "not private" warnings on phones;
 - WhatsApp makes the links tappable;

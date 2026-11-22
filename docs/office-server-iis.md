@@ -36,9 +36,35 @@ Check it later with `nslookup vms.yourcompany.com 8.8.8.8`; it must answer with 
 
 ## Part 2. Prepare the VMS computer
 
-Follow [office-server.md](office-server.md):
-- **Part 3:** fixed local address, never sleep, power on after a power cut;
-- **Part 4:** install Git, uv and Node.js.
+The VMS computer is the gate system: if it's off, check-ins stop. Use one that stays in the office and on all the time: Windows 10/11 or Server, 4 GB RAM, 20 GB free disk, wired network, ideally on a UPS.
+
+### 2.1 Fixed local address
+
+1. On the computer, run `ipconfig` and note its **IPv4 Address** (e.g. `192.168.1.20`).
+2. In the office router's admin page, reserve that address for this computer (*DHCP → Address reservation*, also called *Static lease* or *Bind IP to MAC*).
+
+### 2.2 Never sleep
+
+PowerShell **as Administrator**:
+
+```powershell
+powercfg /change standby-timeout-ac 0
+powercfg /change hibernate-timeout-ac 0
+```
+
+Also turn off automatic restarts during office hours (*Settings → Windows Update → Advanced options → Active hours*). If the BIOS has *Restore on AC power loss*, set it to **Power On**.
+
+### 2.3 Install the tools
+
+1. **Git:** https://git-scm.com/download/win, default options.
+2. **uv:** in PowerShell (normal, not Administrator):
+
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+3. **Node.js LTS:** https://nodejs.org, Windows installer, default options.
+
+Close and reopen PowerShell, then check: `git --version`, `uv --version`, `node --version`.
 
 ## Part 3. Install and start VMS
 
@@ -163,10 +189,60 @@ No restart is needed; IIS picks it up at once.
 
 On a phone on **mobile data**, not office Wi-Fi, open **`https://vms.yourcompany.com`**. It should show the padlock, no warning, and the sign-in page.
 
-Then continue with [office-server.md](office-server.md):
-- **Part 10:** create the organization, run the setup wizard, print the QR posters, add guards, send hosts their sign-in links, and replace the privacy notice;
-- **Part 11, step 3 only:** start VMS by itself with the scheduled task. Skip the Caddy service: IIS takes its place, and it already starts by itself;
-- **Part 12:** backups and updates.
+---
+
+## Part 6. Create your organization and set it up
+
+1. Go to **`https://vms.yourcompany.com/platform/login`** and sign in as the super admin.
+2. Click **New organization** and fill in:
+   - the company name;
+   - the first admin's name, email and password (10+ characters);
+   - **Status: Active**.
+3. Sign out, then sign in at `https://vms.yourcompany.com/login` as that admin. The **setup wizard** walks through:
+   - logo, colours and privacy contact;
+   - site and gate(s);
+   - hosts (CSV import or one by one);
+   - the check-in form;
+   - **QR posters** (print in colour and put up at each gate);
+   - a test visit.
+4. Under **People**:
+   - add **guards**, with role Guard, a password, and their site;
+   - for each **host**, click them, then **Create link**, then *Share on WhatsApp*. The host opens the link on their phone and taps **Turn on alerts**.
+5. Under **Privacy**, replace the placeholder privacy notice. Under **Settings**, check the approval time and *Passes valid until / auto check-out at*.
+
+## Part 7. Make VMS start by itself
+
+IIS already starts by itself. For VMS, close the `serve-public.bat` window, then in PowerShell **as Administrator**, with your Windows user name (it asks for that account's password):
+
+```powershell
+schtasks /Create /TN "VMS" /TR "C:\VMS\serve-public.bat" /SC ONSTART /RU "$env:COMPUTERNAME\YourWindowsUser" /RP * /RL HIGHEST
+schtasks /Run /TN "VMS"
+```
+
+Restart the VMS computer and test from a phone again (give it 2–3 minutes: VMS rebuilds on each start). To stop or start it later: `schtasks /End /TN "VMS"` / `schtasks /Run /TN "VMS"`.
+
+## Part 8. Backups and updates
+
+**Back up at least weekly**; daily is better. Everything lives on the VMS computer:
+
+| What | Where |
+|---|---|
+| Database (visits, people, settings) | `C:\VMS\api\.pgdata` |
+| Photos | `C:\VMS\api\.media` |
+| Settings and keys (without them, passes and sign-ins stop working) | `C:\VMS\api\.env` |
+
+Stop VMS first (`schtasks /End /TN "VMS"`), copy these to another disk or cloud storage, then start it again (`schtasks /Run /TN "VMS"`). Keep the copies private: they hold visitors' personal data.
+
+**Updating VMS:**
+
+```powershell
+schtasks /End /TN "VMS"
+cd C:\VMS
+git pull
+schtasks /Run /TN "VMS"
+```
+
+**Forgot a password:** `cd C:\VMS\api`, then `uv run python -m scripts.set_password someone@yourcompany.com`.
 
 ## Troubleshooting
 

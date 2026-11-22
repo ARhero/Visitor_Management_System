@@ -252,7 +252,7 @@ Phone alerts need a real certificate, so test them on a server with a domain, no
 
 ## 7. Going to production
 
-**Setting up a computer in your office on your own domain** (e.g. `https://vms.yourcompany.com`)? The complete walk-through is [docs/office-server.md](docs/office-server.md).
+**Setting up a computer in your office on your own domain, behind your existing IIS (Microsoft) web server?** The complete walk-through is [docs/office-server-iis.md](docs/office-server-iis.md).
 
 **Running it from this PC on a static IP and its own port?** Follow [docs/public-setup.md](docs/public-setup.md). **A fresh server in another office?** Follow [docs/new-server.md](docs/new-server.md). **On a subdomain of your own domain** (e.g. `vms.yourcompany.com`, with a real certificate)? Follow [docs/custom-domain.md](docs/custom-domain.md): one script switches the settings (`scripts.go_public`), and `serve-public.bat` runs everything on one HTTPS port. The rest of this section is for a proper server.
 
