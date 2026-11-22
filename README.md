@@ -252,7 +252,7 @@ Phone alerts need a real certificate, so test them on a server with a domain, no
 
 ## 7. Going to production
 
-**Running it from this PC on a static IP and its own port?** Follow [docs/public-setup.md](docs/public-setup.md). **A fresh server in another office?** Follow [docs/new-server.md](docs/new-server.md): one script switches the settings (`scripts.go_public`), and `serve-public.bat` runs everything on one HTTPS port. The rest of this section is for a proper server.
+**Running it from this PC on a static IP and its own port?** Follow [docs/public-setup.md](docs/public-setup.md). **A fresh server in another office?** Follow [docs/new-server.md](docs/new-server.md). **On a subdomain of your own domain** (e.g. `vms.yourcompany.com`, with a real certificate)? Follow [docs/custom-domain.md](docs/custom-domain.md): one script switches the settings (`scripts.go_public`), and `serve-public.bat` runs everything on one HTTPS port. The rest of this section is for a proper server.
 
 Set at least these in the API's environment (all variables are explained in [.env.example](.env.example)):
 

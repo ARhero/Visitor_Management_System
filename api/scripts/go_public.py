@@ -12,13 +12,22 @@
 - Makes a self-signed HTTPS certificate for the address (scripts/make_cert.py).
 
 Run it again with a different address to change only the address and the certificate.
+
+Behind a web server that holds a real certificate (a domain; docs/custom-domain.md):
+
+    uv run python -m scripts.go_public https://vms.example.com --behind-proxy 8080
+    uv run python -m scripts.go_public https://vms.example.com --behind-proxy 8080 ^
+        --proxy-ip 192.168.1.5
+
+VMS then listens on plain HTTP on that port (no certificate of its own) and trusts the
+client address the web server passes on (X-Forwarded-For) from --proxy-ip only
+(default 127.0.0.1: the web server is on this same machine).
 """
 
 import re
 import secrets
 import shutil
 import socket
-import sys
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -46,12 +55,15 @@ def _lan_ips() -> list[str]:
         return []
 
 
-def main(url: str) -> None:
+def main(url: str, proxy_port: int | None = None, proxy_ip: str = "127.0.0.1") -> None:
     u = urlsplit(url.rstrip("/"))
-    if u.scheme != "https" or not u.hostname or not u.port:
+    if u.scheme != "https" or not u.hostname or (proxy_port is None and not u.port):
         raise SystemExit(
             "Give the full public address with https and the port, e.g. https://203.0.113.10:8443"
+            " (or a domain with --behind-proxy <port>)"
         )
+    if u.path not in ("", "/"):
+        raise SystemExit("VMS must be at the root of its address (e.g. a subdomain), not a path.")
     lines = ENV.read_text(encoding="utf-8").splitlines() if ENV.exists() else []
     backup = API / ".env.dev.bak"
     if ENV.exists() and not backup.exists():
@@ -69,7 +81,10 @@ def main(url: str) -> None:
         # No WhatsApp unless real WhatsApp (meta) is already set up; never the mock inbox.
         "WHATSAPP_PROVIDER": "meta" if current.get("WHATSAPP_PROVIDER") == "meta" else "off",
         "WEB_DIST_DIR": "../web/dist",
-        "VMS_PORT": str(u.port),
+        "VMS_PORT": str(proxy_port or u.port),
+        # off: plain HTTP for a web server in front that holds the real certificate.
+        "VMS_TLS": "off" if proxy_port else "on",
+        "VMS_PROXY_IPS": proxy_ip if proxy_port else "127.0.0.1",
         # Only the super admin creates organizations (in /platform).
         "ALLOW_SIGNUP": "false",
     }
@@ -109,10 +124,25 @@ def main(url: str) -> None:
     ENV.write_text("\n".join(out) + "\n", encoding="utf-8")
     print(f"api/.env now serves VMS at {u.scheme}://{u.netloc} (ENV=prod)")
 
+    if proxy_port:
+        print(
+            f"VMS will listen on plain HTTP, port {proxy_port}, for the web server at {proxy_ip}."
+            " That web server needs the certificate for the domain (docs/custom-domain.md)."
+        )
+        return
     make_cert.main([u.hostname, *[ip for ip in _lan_ips() if ip != u.hostname]])
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise SystemExit("Usage: uv run python -m scripts.go_public https://<public-ip>:<port>")
-    main(sys.argv[1])
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Switch api/.env to running VMS publicly.")
+    ap.add_argument("url", help="the public address, e.g. https://203.0.113.10:8443")
+    ap.add_argument(
+        "--behind-proxy", type=int, metavar="PORT", help="plain HTTP port for a web server in front"
+    )
+    ap.add_argument(
+        "--proxy-ip", default="127.0.0.1", help="address of that web server (default: this machine)"
+    )
+    a = ap.parse_args()
+    main(a.url, a.behind_proxy, a.proxy_ip)

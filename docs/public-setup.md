@@ -9,7 +9,7 @@ This puts VMS on the internet at `https://<your-static-ip>:<port>`, served by th
 - Phone alerts for hosts don't work with such a certificate.
 - WhatsApp doesn't turn bare IP addresses into tappable links, so people copy links into the browser.
 
-A domain name with a real certificate removes all three limits.
+A domain name with a real certificate removes all three limits: see [custom-domain.md](custom-domain.md).
 
 In the steps below, `203.0.113.10` stands for your static IP and `8443` for the port. Use your own.
 
