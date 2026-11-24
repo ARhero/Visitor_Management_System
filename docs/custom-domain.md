@@ -1,5 +1,7 @@
 # Running VMS on a subdomain of your domain
 
+> Complete step-by-step guides for an office computer: [office-server-caddy.md](office-server-caddy.md) (Caddy on the same computer) and [office-server-iis.md](office-server-iis.md) (behind an existing IIS server).
+
 This gives VMS an address like `https://vms.yourcompany.com`, with a real certificate:
 - no "not private" warnings on phones;
 - WhatsApp makes the links tappable;

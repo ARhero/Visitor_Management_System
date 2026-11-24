@@ -30,11 +30,14 @@ cd api
 uv run python scripts\local_pg.py start || (pause & exit /b 1)
 uv run alembic upgrade head || (pause & exit /b 1)
 echo.
+rem Web server on this same PC: VMS only accepts connections from this PC.
+set "VMS_HOST=0.0.0.0"
+if "%VMS_PROXY_IPS%"=="127.0.0.1" set "VMS_HOST=127.0.0.1"
 if /i "%VMS_TLS%"=="off" (
   rem Behind a web server with the real certificate (docs\custom-domain.md): plain HTTP,
   rem trusting the client address it passes on (X-Forwarded-For) only from that server.
   echo VMS is starting on port %VMS_PORT% ^(HTTP, for the web server at %VMS_PROXY_IPS%^). Close this window to stop it.
-  uv run uvicorn app.main:app --host 0.0.0.0 --port %VMS_PORT% --proxy-headers --forwarded-allow-ips %VMS_PROXY_IPS% --timeout-graceful-shutdown 3
+  uv run uvicorn app.main:app --host %VMS_HOST% --port %VMS_PORT% --proxy-headers --forwarded-allow-ips %VMS_PROXY_IPS% --timeout-graceful-shutdown 3
 ) else (
   echo VMS is starting on port %VMS_PORT% ^(HTTPS^). Close this window to stop it.
   uv run uvicorn app.main:app --host 0.0.0.0 --port %VMS_PORT% --ssl-keyfile .certs\key.pem --ssl-certfile .certs\cert.pem --timeout-graceful-shutdown 3

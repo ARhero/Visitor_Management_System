@@ -1,5 +1,7 @@
 # Office server behind your existing IIS (Microsoft) web server
 
+> Ports 80 and 443 of your static IP free for the VMS computer? [office-server-caddy.md](office-server-caddy.md) is simpler: Caddy on the same computer, no IIS changes.
+
 Use this when **port 443 on your office's static IP is already used by IIS**, the Windows Server that runs your existing website. VMS runs on its own office computer. IIS gets one extra site, `vms.yourcompany.com`, with its own free certificate, and forwards those requests to VMS. The existing website and its settings are not changed.
 
 ```
