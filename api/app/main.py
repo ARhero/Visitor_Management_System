@@ -53,6 +53,25 @@ async def lifespan(_: FastAPI):
     await close_redis()
 
 
+# File types for the web app, set here rather than asked of the operating system: on some
+# Windows computers the registry maps .js to text/plain, and browsers then refuse to run
+# the app's scripts ("Expected a JavaScript module script... MIME type text/plain").
+WEB_TYPES = {
+    ".js": "text/javascript",
+    ".mjs": "text/javascript",
+    ".css": "text/css",
+    ".html": "text/html",
+    ".json": "application/json",
+    ".webmanifest": "application/manifest+json",
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".ico": "image/x-icon",
+    ".woff2": "font/woff2",
+    ".wasm": "application/wasm",
+    ".txt": "text/plain",
+}
+
+
 def _serve_web(app: FastAPI, dist: Path) -> None:
     """The built web app: files as they are, every other path gets index.html (the app
     routes in the browser). Hashed assets are cached for a year, the rest not at all."""
@@ -70,8 +89,10 @@ def _serve_web(app: FastAPI, dist: Path) -> None:
             cache = (
                 "public, max-age=31536000, immutable" if path.startswith("assets/") else "no-cache"
             )
-            return FileResponse(f, headers={"Cache-Control": cache})
-        return FileResponse(index, headers={"Cache-Control": "no-cache"})
+            return FileResponse(
+                f, media_type=WEB_TYPES.get(f.suffix.lower()), headers={"Cache-Control": cache}
+            )
+        return FileResponse(index, media_type="text/html", headers={"Cache-Control": "no-cache"})
 
 
 def create_app() -> FastAPI:
