@@ -38,7 +38,7 @@ Caddy needs **ports 80 and 443 of your static IP** sent to this computer. That's
 
    - **A different IP:** the website is hosted elsewhere, so there's no clash. Continue.
    - **Your office static IP:** the existing web server already uses 443 (and usually 80) there. **This guide won't work**; use [office-server-iis.md](office-server-iis.md) instead, where the existing IIS forwards to VMS.
-2. **Is anything else using ports 80 or 443 on the office router?** Look at the router's *Port forwarding* list, or ask whoever manages it. Neither 80 nor 443 may already be forwarded somewhere else.
+2. **Is anything else using ports 80 or 443 on the office router?** Look at the router's *Port forwarding* list, or ask whoever manages it. Neither 80 nor 443 may already be forwarded somewhere else. **If only 443 is taken and 80 is free**, follow the guide with the changes in [When port 443 is taken](#when-port-443-is-taken-but-80-is-free) at the end.
 3. **Is the static IP really public?** In the router's status page, the **WAN / Internet IP** must match the address shown by https://ifconfig.me on a computer in the office. If they differ, the provider shares the IP between customers, and incoming connections won't reach you. Ask the provider for a real static public IP.
 
 If all three are fine, continue.
@@ -321,6 +321,32 @@ uv run python -m scripts.set_password someone@yourcompany.com
 ```
 
 ---
+
+## When port 443 is taken but 80 is free
+
+If the router already forwards 443 to another device (e.g. an existing web server), leave that alone. Caddy can still get the free certificate through port **80**, and serve VMS on another public port, e.g. **8443**. Visitors then use `https://vms.yourcompany.com:8443`, and every link and QR code carries the `:8443`.
+
+The changes to the steps above (8090 here is VMS's own internal port, use yours):
+
+- **Part 5.2, settings:** include the public port in the address:
+
+  ```powershell
+  uv run python -m scripts.go_public https://vms.yourcompany.com:8443 --behind-proxy 8090
+  ```
+- **Part 6, Caddyfile:** the site line carries the port:
+
+  ```powershell
+  Set-Content -Path C:\caddy\Caddyfile -Encoding ascii -Value "vms.yourcompany.com:8443 {", "    reverse_proxy 127.0.0.1:8090", "}"
+  ```
+- **Part 7.1, router:** forward **80** (TCP) → this computer, port 80, and **8443** (TCP) → this computer, port 8443. Don't touch the existing 443 rule.
+- **Part 7.2, firewall:**
+
+  ```powershell
+  New-NetFirewallRule -DisplayName "VMS web (Caddy)" -Direction Inbound -Protocol TCP -LocalPort 80,8443 -Action Allow -Profile Any
+  ```
+- **Parts 8–10:** use `https://vms.yourcompany.com:8443` wherever the guide says `https://vms.yourcompany.com`.
+
+Port 80 must stay forwarded to this computer: Caddy uses it to renew the certificate about every two months. A few guest or company Wi-Fi networks block unusual ports like 8443, so test from the networks your visitors use.
 
 ## Troubleshooting
 
