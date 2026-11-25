@@ -109,6 +109,6 @@ In the admin panel:
 
 ## Updating and going back
 
-- **Updating the code:** close the window and run `serve-public.bat` again. It rebuilds the app and applies database updates.
+- **Updating the code:** close the window and run `serve-public.bat` again. It rebuilds the app when its code changed, and applies database updates.
 - **Back to development on this PC:** close the window, copy `api\.env.dev.bak` over `api\.env`, then run `start.bat`.
 - **Static IP or port changed:** run step 5 again with the new address, then step 7, and re-download the QR posters.

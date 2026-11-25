@@ -221,7 +221,7 @@ schtasks /Create /TN "VMS" /TR "C:\VMS\serve-public.bat" /SC ONSTART /RU "$env:C
 schtasks /Run /TN "VMS"
 ```
 
-Restart the VMS computer and test from a phone again (give it 2–3 minutes: VMS rebuilds on each start). To stop or start it later: `schtasks /End /TN "VMS"` / `schtasks /Run /TN "VMS"`.
+Restart the VMS computer and test from a phone again (give it a minute or two). To stop or start it later: `schtasks /End /TN "VMS"` / `schtasks /Run /TN "VMS"`.
 
 ## Part 8. Backups and updates
 
@@ -252,6 +252,7 @@ schtasks /Run /TN "VMS"
 |---|---|
 | win-acme fails to verify | DNS for `vms` must already point at the static IP; the `vms` site needs its `http` binding on 80 with host name `vms.yourcompany.com`; port 80 must reach IIS (it does if the existing site answers on http) |
 | The existing website broke | It shouldn't: everything here is on the separate `vms` site, by host name. Check the `vms` bindings all carry the host name `vms.yourcompany.com` and the https one has SNI ticked |
+| `serve-public.bat` says the port is **already in use** | Usually VMS is already running (the scheduled task, or another window): nothing to do. To restart it, `schtasks /End /TN "VMS"`, then run it again. If another program holds the port, the message names it: pick another port as it explains |
 | **502.3 Bad Gateway** | VMS not running on the VMS computer (`serve-public.bat` window or the scheduled task), wrong address in `web.config`, or the firewall rule in Part 3.5 |
 | **404** from IIS on every page | URL Rewrite isn't installed, or *Enable proxy* (4.2) isn't ticked |
 | The visitor's waiting screen doesn't update by itself | *Response buffer threshold* must be `0` (4.2). The page still refreshes every 10 seconds anyway |

@@ -22,9 +22,37 @@ set "VMS_PORT="
 for /f "usebackq tokens=1,* delims==" %%a in ("api\.env") do if /i "%%a"=="VMS_PORT" set "VMS_PORT=%%b"
 if not defined VMS_PORT (echo VMS_PORT is missing from api\.env: run scripts.go_public first & pause & exit /b 1)
 
-if not exist "web\node_modules" call npm --prefix web install || (pause & exit /b 1)
+rem Only one program can listen on a port: stop here if something already does (usually
+rem VMS itself, still running from an earlier start or the scheduled task).
+set "BUSY="
+for /f "tokens=5" %%p in ('netstat -ano -p tcp ^| findstr /r /c:":%VMS_PORT% .*LISTENING"') do set "BUSY=%%p"
+if defined BUSY (
+  echo.
+  echo Port %VMS_PORT% is already in use, by this program:
+  tasklist /FI "PID eq %BUSY%" /NH
+  echo.
+  echo  - If it is python.exe, VMS is already running: nothing to do.
+  echo    To restart it: schtasks /End /TN "VMS"  ^(or close its window^), then run this again.
+  echo  - If it is something else, give VMS another port, in the api folder:
+  echo    uv run python -m scripts.go_public ^<your address^> --behind-proxy ^<free port^>
+  echo    and use the same port in the Caddyfile or IIS web.config.
+  pause & exit /b 1
+)
+
+rem Build the web app only when its code changed (e.g. after git pull).
+node web\scripts\needs-build.mjs
+if errorlevel 20 (
+  echo Installing web packages...
+  call npm --prefix web install || (pause & exit /b 1)
+  goto build
+)
+if errorlevel 1 goto build
+echo The web app is up to date.
+goto built
+:build
 echo Building the web app...
 call npm --prefix web run build || (pause & exit /b 1)
+:built
 
 cd api
 uv run python scripts\local_pg.py start || (pause & exit /b 1)

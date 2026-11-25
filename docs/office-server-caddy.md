@@ -271,7 +271,7 @@ Both must come back after a restart or power cut, without anyone signing in.
    schtasks /Create /TN "VMS" /TR "C:\VMS\serve-public.bat" /SC ONSTART /RU "$env:COMPUTERNAME\YourWindowsUser" /RP * /RL HIGHEST
    schtasks /Run /TN "VMS"
    ```
-4. **Restart the computer**, wait 2–3 minutes (VMS rebuilds on each start), and test again from a phone (Part 9).
+4. **Restart the computer**, wait a minute or two, and test again from a phone (Part 9).
 
 Handy commands:
 
@@ -311,7 +311,7 @@ git pull
 schtasks /Run /TN "VMS"
 ```
 
-It rebuilds and applies database updates by itself.
+It rebuilds the app (only when its code changed) and applies database updates by itself.
 
 ### Forgotten password
 
@@ -331,6 +331,7 @@ uv run python -m scripts.set_password someone@yourcompany.com
 | Caddy can't get a certificate | DNS must show your IP first. Ports 80 and 443 must be forwarded to this computer (7.1) and allowed in the firewall (7.2). Nothing else may use them (Part 1). The provider mustn't block them |
 | Works on mobile data, not on the office Wi-Fi | NAT loopback or a local DNS entry in the router (9.2) |
 | "Site can't be reached" from outside | Router forwards, firewall rule, and Caddy running (`sc.exe query caddy`) |
+| `serve-public.bat` says the port is **already in use** | Usually VMS is already running (the scheduled task, or another window): nothing to do. To restart it, `schtasks /End /TN "VMS"`, then run it again. If another program holds the port, the message names it: pick another port as it explains |
 | "502 Bad Gateway" | VMS isn't running: `schtasks /Run /TN "VMS"`, or run `serve-public.bat` by hand to see its messages |
 | Sign-in loops back to the login page | The address given to `go_public` must be exactly `https://vms.yourcompany.com` |
 | Everything stopped after a power cut | BIOS *Restore on AC power loss* (3.2), the VMS task and the Caddy service (Part 11) |

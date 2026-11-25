@@ -105,7 +105,7 @@ Then:
 
 - **Start automatically:** in Task Scheduler, create a task *At log on* that runs `C:\VMS\serve-public.bat`. Make the PC sign in automatically after power cuts, or put it on a UPS.
 - **Backups:** regularly close the window and copy `api\.pgdata` (the database) and `api\.media` (photos) somewhere safe. There is no automatic backup yet.
-- **Updates:** close the window, run `git pull` in `C:\VMS`, then run `serve-public.bat` again. It rebuilds and applies database updates. Your settings and data are untouched, since they are not in git.
+- **Updates:** close the window, run `git pull` in `C:\VMS`, then run `serve-public.bat` again. It rebuilds the app when its code changed, and applies database updates. Your settings and data are untouched, since they are not in git.
 
 ## If something goes wrong
 
