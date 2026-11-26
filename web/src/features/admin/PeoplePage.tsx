@@ -236,11 +236,15 @@ function PersonFormBody({ user, onDone }: { user: User | null; onDone: () => voi
         </fieldset>
       )}
 
-      {(needsPassword || user?.has_password) && (
-        <Field label={user?.has_password ? "Reset password" : "Initial password"} hint={user?.has_password ? "Leave empty to keep the current one. Resetting signs them out everywhere." : "At least 10 characters. Share it with them securely."}>
-          {(i) => <Input id={i} type="password" autoComplete="new-password" minLength={10} required={needsPassword} value={f.password} onChange={set("password")} />}
-        </Field>
-      )}
+      <Field
+        label={user?.has_password ? "Reset password" : needsPassword ? "Initial password" : "Password (optional)"}
+        hint={user?.has_password
+          ? "Leave empty to keep the current one. Resetting signs them out everywhere."
+          : needsPassword
+            ? "At least 10 characters. Share it with them securely."
+            : "Lets them sign in with their mobile number and this password, as well as with sign-in links. At least 10 characters. Anyone already signed in stays signed in."}>
+        {(i) => <Input id={i} type="password" autoComplete="new-password" minLength={10} required={needsPassword} value={f.password} onChange={set("password")} />}
+      </Field>
 
       {user?.is_active && <SignInLink user={user} />}
 

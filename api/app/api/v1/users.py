@@ -234,10 +234,13 @@ async def update_user(p: AdminUser, user: UserPath, body: UserUpdate, db: Tenant
         )
 
     diff = audit.changes(user, data)
+    # A first password only adds a way to sign in, so current sign-ins (e.g. a host's link)
+    # stay; replacing an existing one signs them out, in case the old one leaked.
+    replaced_password = bool(body.password and user.password_hash)
     if body.password:
         user.password_hash = hash_password(body.password)
-        diff["password"] = ["***", "***"]
-    if data.get("is_active") is False or body.password or "roles" in diff:
+        diff["password"] = ["***" if replaced_password else None, "***"]
+    if data.get("is_active") is False or replaced_password or "roles" in diff:
         # Sign the person out everywhere; the new state applies at next login/refresh.
         from app.core.db import system_session
 
